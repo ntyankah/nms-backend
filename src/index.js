@@ -5,6 +5,7 @@ import cors from 'cors'
 import { initializeDb } from './setup/dbsetup.js';
 import { errorHandler } from './middleware/error-handler.middleware.js';
 import userRoutes from './routes/user.route.js';
+import offenceRecordRoutes from './routes/offence-record.route.js';
 
 const allowedOrigins = ['http://localhost:5173'];
 dotenv.config()
@@ -32,6 +33,7 @@ async function initializeApp () {
       res.send('Hello, world!');
     });
     app.use('/api/users', userRoutes)
+    app.use('/api/records', offenceRecordRoutes)
     app.use(errorHandler)
     
     // Start the server
