@@ -1,6 +1,6 @@
 export const releaseReasons = {
     sales: 'SALES',
-    administrativeCharge: 'ADMINSTRATIVECHARGE',
+    administrativeCharge: 'ADMINISTRATIVECHARGE',
     penalty: 'PENALTY',
     resolved: 'RESOLVED'
 }
