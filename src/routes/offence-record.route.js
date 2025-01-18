@@ -60,7 +60,7 @@ router.post(
             }
             return true;
           })
-        .withMessage('penaltyAmount is required when releaseReasons includes "sales"'),
+        .withMessage('penaltyAmount is required when releaseReasons includes "penalty"'),
     
     body('administrativeAmount')
         .custom((value, { req }) => {
@@ -69,12 +69,12 @@ router.post(
             }
             return true;
           })
-        .withMessage('administrativeAmount is required when releaseReasons includes "sales"'),
+        .withMessage('administrativeAmount is required when releaseReasons includes "administrativecharge"'),
     
     body('salesReceipt')
         .optional()
         .custom((value, { req }) => {
-            if (req.body.releaseReason?.includes(releaseReasons.sales) && (value === undefined || value === null)) {
+            if (req.body.releaseReason?.includes(releaseReasons.sales) && (value === undefined || value === null || value.trim().length == 0)) {
               return false
             }
             return true;
@@ -84,22 +84,32 @@ router.post(
     body('penaltyReceipt')
         .optional()
         .custom((value, { req }) => {
-            if (req.body.releaseReason?.includes(releaseReasons.penalty) && (value === undefined || value === null)) {
+            if (req.body.releaseReason?.includes(releaseReasons.penalty) && (value === undefined || value === null || value.trim().length == 0)) {
               return false
             }
             return true;
           })
-        .withMessage('penaltyReceipt is required when releaseReasons includes "sales"'),
+        .withMessage('penaltyReceipt is required when releaseReasons includes "penalty"'),
     
     body('administrativeReceipt')
         .optional()
         .custom((value, { req }) => {
-            if (req.body.releaseReason?.includes(releaseReasons.administrativeCharge) && (value === undefined || value === null)) {
+            if (req.body.releaseReason?.includes(releaseReasons.administrativeCharge) && (value === undefined || value === null || value.trim().length == 0)) {
               return false
             }
             return true;
           })
-        .withMessage('administrativeReceipt is required when releaseReasons includes "sales"'),
+        .withMessage('administrativeReceipt is required when releaseReasons includes "administrative charge"'),
+
+    body('resolvedReason')
+        .optional()
+        .custom((value, { req }) => {
+            if (req.body.releaseReason?.includes(releaseReasons.resolved) && (value === undefined || value === null || value.trim().length == 0)) {
+              return false
+            }
+            return true;
+          })
+        .withMessage('resolvedReason is required when releaseReasons includes "resolved"'),
     
   ],
   handleValidationErrors,

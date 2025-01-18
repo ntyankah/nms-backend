@@ -20,6 +20,7 @@ export const markOffenceRecordCompleted = async (req, res) => {
         penaltyReceipt,
         administrativeAmount,
         administrativeReceipt,
+        resolvedReason
     } = req.body;
     const {id: _id} = req.params
     const offenceRecord = await OffenceRecord.findById(_id);
@@ -38,7 +39,11 @@ export const markOffenceRecordCompleted = async (req, res) => {
         offenceRecord.administrativeReceipt = administrativeReceipt
     }
 
-    offenceRecord.releaseReason = releaseReason
+    if(releaseReason.includes(releaseReasons.resolved)) {
+        offenceRecord.resolvedReason = resolvedReason
+    }
+
+    offenceRecord.releaseReasons = releaseReason
     offenceRecord.releaseDate = releaseDate
 
     const savedRecord = await offenceRecord.save();
