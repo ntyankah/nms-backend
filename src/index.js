@@ -9,6 +9,7 @@ import offenceRecordRoutes from './routes/offence-record.route.js';
 
 const allowedOrigins = ['http://localhost:5173'];
 dotenv.config()
+
 async function initializeApp () {
     const app = express();
     await initializeDb()
@@ -38,6 +39,7 @@ async function initializeApp () {
     
     // Start the server
     const PORT = process.env.PORT || 3000;
+    
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });

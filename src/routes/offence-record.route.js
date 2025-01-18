@@ -112,6 +112,7 @@ router.get('/drafts', getAllDraftRecords);
 
 router.get('/completed', getAllCompletedRecords);
 
-router.delete('/:id', param('id').isMongoId().withMessage('Invalid Record ID'), handleValidationErrors, deleteOffenceRecord);
+router.delete('/delete/:id', param('id').isMongoId().withMessage('Invalid Record ID'), handleValidationErrors, deleteOffenceRecord);
+
 
 export default router;

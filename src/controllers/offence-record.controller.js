@@ -19,13 +19,13 @@ export const markOffenceRecordCompleted = async (req, res) => {
         penaltyAmount, 
         penaltyReceipt,
         administrativeAmount,
-        administrativeReceipt
+        administrativeReceipt,
     } = req.body;
     const {id: _id} = req.params
     const offenceRecord = await OffenceRecord.findById(_id);
     if(releaseReason.includes(releaseReasons.sales)) {
         offenceRecord.salesAmount = salesAmount
-        offenceRecord.salesReceipt = salesReceipt
+        offenceRecord.salesReceipt = salesReceipt 
     }
 
     if(releaseReason.includes(releaseReasons.penalty)) {
@@ -65,6 +65,18 @@ export const getAllCompletedRecords = async (req, res) => {
 
 // Delete a offence record by ID
 export const deleteOffenceRecord = async (req, res) => {
-    await OffenceRecord.findByIdAndDelete(req.params.id);
-    res.status(204).send();
+    console.log('Entered the delete records function')
+    try {
+        const { id } = req.params;
+        const deletedRecord = await OffenceRecord.findByIdAndDelete(id);
+    
+        if (!deletedRecord) {
+          return res.status(404).json({ message: 'Record not found' });
+        }
+        res.status(200).json({ message: 'Record deleted successfully' });
+      } catch (error) {
+        console.error('Error deleting record:', error.message);
+        res.status(500).json({ message: 'Error deleting record', error: error.message });
+      }
+    
 };
