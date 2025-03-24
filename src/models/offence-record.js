@@ -19,7 +19,7 @@ const offenceRecordSchema = new mongoose.Schema({
   penaltyAmount: {type: Number , default: null},
   administrativeAmount: {type: Number , default: null},
   resolvedReason: {type: String , default: null},
-});
+}, { timestamps: true });
 
 const OffenceRecord = mongoose.model('OffenceRecord', offenceRecordSchema);
 export default OffenceRecord;
