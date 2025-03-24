@@ -6,7 +6,8 @@ import { createOffenceRecordDraft,
     getAllOffenceRecords,
     getAllDraftRecords,
     getAllCompletedRecords,
-    deleteOffenceRecord
+    deleteOffenceRecord,
+    getAnalytics
 } from '../controllers/offence-record.controller.js';
 import { handleValidationErrors } from '../middleware/validation.middleware.js';
 import { vehicleTypes } from '../constants/vehicle-types.js';
@@ -121,6 +122,8 @@ router.get('/all', getAllOffenceRecords);
 router.get('/drafts', getAllDraftRecords);
 
 router.get('/completed', getAllCompletedRecords);
+
+router.get('/analytics', getAnalytics);
 
 router.delete('/delete/:id', param('id').isMongoId().withMessage('Invalid Record ID'), handleValidationErrors, deleteOffenceRecord);
 

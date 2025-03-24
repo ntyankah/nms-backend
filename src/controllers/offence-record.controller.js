@@ -85,3 +85,133 @@ export const deleteOffenceRecord = async (req, res) => {
       }
     
 };
+
+// Add the analytics controller
+export const getAnalytics = async (req, res) => {
+    try {
+        // Fetch all offence records
+        const offenceRecords = await OffenceRecord.find();
+
+        // Analysis function from previous response
+        const analyzeTruckData = (documents) => {
+            const analysis = {
+                combinedTotals: {
+                    administrativeAmount: 0,
+                    penaltyAmount: 0,
+                    salesAmount: 0
+                },
+                truckStatus: {
+                    pending: 0,
+                    completed: 0
+                },
+                quarterly: {
+                    Q1: { salesAmount: 0, penaltyAmount: 0, administrativeAmount: 0 },
+                    Q2: { salesAmount: 0, penaltyAmount: 0, administrativeAmount: 0 },
+                    Q3: { salesAmount: 0, penaltyAmount: 0, administrativeAmount: 0 },
+                    Q4: { salesAmount: 0, penaltyAmount: 0, administrativeAmount: 0 }
+                },
+                transactionCounts: {
+                    penalty: 0,
+                    sales: 0,
+                    administrative: 0
+                },
+                monthlyAnalytics: {},
+                recentModifications: []
+            };
+
+            documents.forEach(doc => {
+                // Combined totals
+                analysis.combinedTotals.administrativeAmount += doc.administrativeAmount || 0;
+                analysis.combinedTotals.penaltyAmount += doc.penaltyAmount || 0;
+                analysis.combinedTotals.salesAmount += doc.salesAmount || 0;
+
+                // Truck status
+                if (doc.releaseDate === null) {
+                    analysis.truckStatus.pending += 1;
+                } else {
+                    analysis.truckStatus.completed += 1;
+                }
+
+                // Quarterly analysis
+                if (doc.arrestDate) {
+                    const arrestDate = new Date(doc.arrestDate);
+                    const quarter = Math.ceil((arrestDate.getMonth() + 1) / 3);
+                    const quarterKey = `Q${quarter}`;
+                    
+                    analysis.quarterly[quarterKey].salesAmount += doc.salesAmount || 0;
+                    analysis.quarterly[quarterKey].penaltyAmount += doc.penaltyAmount || 0;
+                    analysis.quarterly[quarterKey].administrativeAmount += doc.administrativeAmount || 0;
+                }
+
+                // Transaction counts
+                if (doc.penaltyAmount) analysis.transactionCounts.penalty += 1;
+                if (doc.salesAmount) analysis.transactionCounts.sales += 1;
+                if (doc.administrativeAmount) analysis.transactionCounts.administrative += 1;
+
+                // Monthly analytics
+                const arrestDate = new Date(doc.arrestDate);
+                const monthKey = arrestDate.toLocaleString('default', { month: 'long', year: 'numeric' });
+                
+                if (!analysis.monthlyAnalytics[monthKey]) {
+                    analysis.monthlyAnalytics[monthKey] = {
+                        sales: { total: 0, entries: 0 },
+                        penalty: { total: 0, entries: 0 },
+                        administrative: { total: 0, entries: 0 },
+                        releasedWithNoAmount: 0
+                    };
+                }
+
+                const monthly = analysis.monthlyAnalytics[monthKey];
+                if (doc.salesAmount) {
+                    monthly.sales.total += doc.salesAmount;
+                    monthly.sales.entries += 1;
+                }
+                if (doc.penaltyAmount) {
+                    monthly.penalty.total += doc.penaltyAmount;
+                    monthly.penalty.entries += 1;
+                }
+                if (doc.administrativeAmount) {
+                    monthly.administrative.total += doc.administrativeAmount;
+                    monthly.administrative.entries += 1;
+                }
+                if (doc.releaseDate && !doc.salesAmount && !doc.penaltyAmount && !doc.administrativeAmount) {
+                    monthly.releasedWithNoAmount += 1;
+                }
+            });
+
+            // For recent modifications, using updatedAt if available, otherwise arrestDate
+            analysis.recentModifications = documents
+                .sort((a, b) => {
+                    const dateA = a.updatedAt ? new Date(a.updatedAt) : new Date(a.arrestDate);
+                    const dateB = b.updatedAt ? new Date(b.updatedAt) : new Date(b.arrestDate);
+                    return dateB - dateA;
+                })
+                .slice(0, 5)
+                .map(doc => ({
+                    truckNo: doc.truckNo,
+                    arrestDate: doc.arrestDate,
+                    offence: doc.offence,
+                    modifiedAt: doc.updatedAt || doc.arrestDate
+                }));
+
+            return analysis;
+        };
+
+        // Get analytics data
+        const analyticsData = analyzeTruckData(offenceRecords);
+
+        // Return successful response
+        res.status(200).json({
+            success: true,
+            data: analyticsData
+        });
+
+    } catch (error) {
+        console.error('Error fetching analytics:', error.message);
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching analytics',
+            error: error.message
+        });
+    }
+};
