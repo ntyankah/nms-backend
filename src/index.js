@@ -26,12 +26,15 @@ app.use(async (req, res, next) => {
 });
 
 // Handle OPTIONS preflight requests
-app.options('*', cors({
-  origin: allowedOrigins,
-  methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-}));
+app.options('*', (req, res, next) => {
+  console.log('Handling OPTIONS request');
+  cors({
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  })(req, res, next);
+});
 
 // CORS configuration for all requests
 app.use(
