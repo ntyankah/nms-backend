@@ -7,7 +7,7 @@ import { errorHandler } from './middleware/error-handler.middleware.js';
 import userRoutes from './routes/user.route.js';
 import offenceRecordRoutes from './routes/offence-record.route.js';
 
-const allowedOrigins = ['http://localhost:5173']; // Add production frontend URL if applicable
+const allowedOrigins = ['http://localhost:5173']; // Add production URL if needed
 dotenv.config();
 
 const app = express();
@@ -25,19 +25,21 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// CORS configuration
+// Handle OPTIONS preflight requests
+app.options('*', cors({
+  origin: allowedOrigins,
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}));
+
+// CORS configuration for all requests
 app.use(
   cors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-    methods: ['GET', 'POST', 'OPTIONS'], // Explicitly allow methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allow common headers
-    credentials: true, // If you need cookies or auth headers
+    origin: allowedOrigins,
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
   })
 );
 
