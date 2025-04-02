@@ -10,8 +10,20 @@ import offenceRecordRoutes from './routes/offence-record.route.js';
 const allowedOrigins = ['http://localhost:5173'];
 dotenv.config();
 
-// Create the Express app
 const app = express();
+
+// Ensure DB is initialized before any request
+let dbInitialized = false;
+const initialize = async () => {
+  if (!dbInitialized) {
+    await initializeDb();
+    dbInitialized = true;
+  }
+};
+app.use(async (req, res, next) => {
+  await initialize();
+  next();
+});
 
 // Middleware
 app.use(
@@ -25,28 +37,21 @@ app.use(
     },
   })
 );
-app.use(express.json()); // JSON parsing middleware
+app.use(express.json());
 
-// Test heartbeat
+// Test routes
 app.get('/', (req, res) => {
   res.send('Hello, world!');
 });
+app.get('/api/test', (req, res) => {
+  res.send('Test route works!');
+});
 
-// Routes
+// API routes
 app.use('/api/users', userRoutes);
 app.use('/api/records', offenceRecordRoutes);
 
 // Error handler
 app.use(errorHandler);
 
-// Initialize the database (runs once when the module is loaded)
-let dbInitialized = false;
-(async () => {
-  if (!dbInitialized) {
-    await initializeDb();
-    dbInitialized = true;
-  }
-})();
-
-// Export the app for Vercel
 export default app;
