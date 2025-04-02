@@ -7,12 +7,12 @@ import { errorHandler } from './middleware/error-handler.middleware.js';
 import userRoutes from './routes/user.route.js';
 import offenceRecordRoutes from './routes/offence-record.route.js';
 
-const allowedOrigins = ['http://localhost:5173'];
+const allowedOrigins = ['http://localhost:5173']; // Add production frontend URL if applicable
 dotenv.config();
 
 const app = express();
 
-// Ensure DB is initialized before any request
+// Ensure DB is initialized
 let dbInitialized = false;
 const initialize = async () => {
   if (!dbInitialized) {
@@ -25,8 +25,7 @@ app.use(async (req, res, next) => {
   next();
 });
 
-// Middleware
-
+// CORS configuration
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -36,15 +35,13 @@ app.use(
         callback(new Error('Not allowed by CORS'));
       }
     },
+    methods: ['GET', 'POST', 'OPTIONS'], // Explicitly allow methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow common headers
+    credentials: true, // If you need cookies or auth headers
   })
 );
 
-// app.use(cors({
-//   origin: 'http://localhost:5173',
-//   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//   allowedHeaders: ['Content-Type', 'Authorization'],
-// })
-        
+// Middleware
 app.use(express.json());
 
 // Test routes
